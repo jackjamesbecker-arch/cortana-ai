@@ -1,0 +1,7 @@
+{
+  "routes": [
+    { "src": "/api/auth", "dest": "/api/auth.mjs" },
+    { "src": "/api/chat", "dest": "/api/chat.mjs" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
