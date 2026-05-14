@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#29b6f6"/>
+<title>C O R T A N A — UNSC AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;font-family:'Share Tech Mono',monospace;}
+
+:root{
+  --bg0:#020d1a;
+  --bg1:#050f1e;
+  --bg2:#0a1a2e;
+  --bg3:#0d2040;
+  --accent:#29b6f6;
+  --accent2:#00e5ff;
+  --accent3:#1565c0;
+  --dim:rgba(41,182,246,0.15);
+  --dim2:rgba(41,182,246,0.08);
+  --border:rgba(41,182,246,0.2);
+  --border2:rgba(41,182,246,0.4);
+  --text:#c8e6f7;
+  --text2:rgba(200,230,247,0.55);
+  --text3:rgba(200,230,247,0.3);
+  --success:#4caf50;
+  --warning:#ff9800;
+  --danger:#f44336;
+  --orbitron:'Orbitron',monospace;
+  --mono:'Share Tech Mono',monospace;
+}
+
+/* THEME VARIANTS */
+body.theme-covenant{--accent:#9c27b0;--accent2:#e040fb;--accent3:#6a0080;--bg0:#0d0015;--bg1:#110020;--bg2:#180030;}
+body.theme-forerunner{--accent:#ffd600;--accent2:#ffea00;--accent3:#f9a825;--bg0:#0d0a00;--bg1:#151000;--bg2:#1e1600;}
+body.theme-flood{--accent:#4caf50;--accent2:#69f0ae;--accent3:#1b5e20;--bg0:#001a00;--bg1:#002200;--bg2:#003300;}
+body.theme-red{--accent:#f44336;--accent2:#ff5252;--accent3:#b71c1c;--bg0:#1a0000;--bg1:#200000;--bg2:#2d0000;}
+
+body{background:var(--bg0);color:var(--text);cursor:crosshair;}
+
+/* SCANLINES */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);pointer-events:none;z-index:9999;}
+
+/* GRID */
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(41,182,246,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(41,182,246,0.04) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0;}
+
+/* ===== LOGIN SCREEN ===== */
+#login-screen{
+  position:fixed;inset:0;z-index:1000;
+  background:var(--bg0);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;
+}
+.login-logo{
+  font-family:var(--orbitron);font-size:42px;font-weight:900;
+  letter-spacing:12px;color:var(--accent);
+  text-shadow:0 0 40px rgba(41,182,246,0.6),0 0 80px rgba(41,182,246,0.2);
+  animation:logoPulse 3s ease-in-out infinite;
+}
+@keyframes logoPulse{0%,100%{text-shadow:0 0 40px rgba(41,182,246,0.6),0 0 80px rgba(41,182,246,0.2);}50%{text-shadow:0 0 60px rgba(41,182,246,0.9),0 0 120px rgba(41,182,246,0.4);}}
+.login-sub{font-size:11px;letter-spacing:5px;color:var(--text2);}
+.login-card{
+  background:var(--bg2);border:1px solid var(--border);
+  padding:40px 48px;width:380px;
+  display:flex;flex-direction:column;gap:20px;
+}
+.login-label{font-size:10px;letter-spacing:4px;color:var(--text2);margin-bottom:4px;}
+.login-input{
+  width:100%;background:var(--bg0);border:1px solid var(--border);
+  color:var(--accent);font-family:var(--mono);font-size:13px;
+  padding:12px 16px;outline:none;caret-color:var(--accent2);
+  transition:border-color 0.2s;
+}
+.login-input:focus{border-color:var(--accent);}
+.login-input::placeholder{color:var(--text3);}
+.login-error{font-size:11px;color:var(--danger);letter-spacing:2px;display:none;}
+.login-btn{
+  width:100%;padding:14px;background:var(--accent3);border:1px solid var(--accent);
+  color:var(--accent2);font-family:var(--orbitron);font-size:11px;font-weight:700;
+  letter-spacing:4px;cursor:pointer;transition:all 0.2s;
+}
+.login-btn:hover{background:var(--accent);color:var(--bg0);}
+.login-auth{display:flex;flex-direction:column;gap:10px;}
+.auth-step{font-size:11px;letter-spacing:2px;color:var(--text3);display:flex;align-items:center;gap:10px;}
+.auth-step.done{color:var(--success);}
+.auth-step span.dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+
+/* BREATHING ORB (login) */
+.login-orb-wrap{position:relative;width:120px;height:120px;display:flex;align-items:center;justify-content:center;margin:0 auto;}
+.login-orb-ring{position:absolute;border-radius:50%;border:1px solid rgba(41,182,246,0.2);width:100%;height:100%;animation:orbRing 6s ease-in-out infinite;}
+.login-orb-ring.b{animation-delay:-2s;}
+.login-orb-ring.c{animation-delay:-4s;}
+@keyframes orbRing{0%{transform:scale(1);opacity:0.5;}50%{transform:scale(1.8);opacity:0;}100%{transform:scale(1);opacity:0;}}
+.login-orb-core{width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#4fc3f7 0%,#1565c0 45%,#0a1e5e 100%);box-shadow:0 0 30px 10px rgba(41,182,246,0.5),0 0 70px 25px rgba(21,101,192,0.35),inset 0 0 20px rgba(79,195,247,0.2);animation:orbBreathe 6s ease-in-out infinite;cursor:pointer;z-index:2;}
+@keyframes orbBreathe{0%,100%{transform:scale(1);}50%{transform:scale(1.35);}}
+
+/* ===== MAIN APP ===== */
+#app{display:none;height:100%;flex-direction:column;}
+
+/* TOP BAR */
+#topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;height:52px;flex-shrink:0;
+  background:var(--bg1);border-bottom:1px solid var(--border);
+  position:relative;z-index:50;
+}
+.topbar-logo{font-family:var(--orbitron);font-size:16px;font-weight:900;letter-spacing:6px;color:var(--accent);text-shadow:0 0 20px rgba(41,182,246,0.5);}
+.topbar-meta{font-size:9px;letter-spacing:3px;color:var(--text2);}
+.topbar-right{display:flex;align-items:center;gap:16px;}
+.topbar-stat{text-align:center;}
+.topbar-stat-val{font-family:var(--orbitron);font-size:13px;color:var(--accent);}
+.topbar-stat-lbl{font-size:8px;letter-spacing:2px;color:var(--text3);}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success);animation:blink 2s step-end infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.icon-btn{background:transparent;border:none;color:var(--text2);cursor:pointer;font-size:16px;padding:6px;transition:color 0.2s;font-family:var(--mono);letter-spacing:1px;font-size:11px;}
+.icon-btn:hover{color:var(--accent);}
+
+/* MAIN BODY */
+#main-body{display:flex;flex:1;overflow:hidden;}
+
+/* LEFT PANEL */
+#left-panel{
+  width:220px;flex-shrink:0;
+  background:var(--bg1);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+.panel-section{padding:16px;border-bottom:1px solid var(--border);}
+.panel-title{font-size:8px;letter-spacing:4px;color:var(--text3);margin-bottom:12px;}
+
+/* ORB in sidebar */
+.side-orb-wrap{position:relative;width:90px;height:90px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+.side-orb-ring{position:absolute;border-radius:50%;border:1px solid rgba(41,182,246,0.18);width:100%;height:100%;animation:orbRing 16s ease-in-out infinite;}
+.side-orb-ring.b{animation-delay:-5.3s;}
+.side-orb-ring.c{animation-delay:-10.6s;}
+.side-orb-core{width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#4fc3f7 0%,#1565c0 45%,#0a1e5e 100%);box-shadow:0 0 20px 6px rgba(41,182,246,0.5),0 0 50px 18px rgba(21,101,192,0.3),inset 0 0 16px rgba(79,195,247,0.2);animation:orbBreathe 16s ease-in-out infinite;cursor:pointer;z-index:2;position:relative;transition:box-shadow 0.3s;}
+.side-orb-core:hover{box-shadow:0 0 30px 10px rgba(41,182,246,0.7),0 0 70px 25px rgba(21,101,192,0.45);}
+.orb-label{text-align:center;font-size:9px;letter-spacing:3px;color:var(--text2);}
+
+/* CAPABILITIES */
+.cap-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.cap-btn{
+  background:var(--dim2);border:1px solid var(--border);
+  color:var(--text2);font-family:var(--mono);font-size:9px;letter-spacing:1px;
+  padding:8px 6px;cursor:pointer;transition:all 0.2s;text-align:center;
+}
+.cap-btn:hover,.cap-btn.active{background:var(--dim);border-color:var(--accent);color:var(--accent);}
+.cap-code{font-family:var(--orbitron);font-size:8px;font-weight:700;color:var(--accent2);display:block;margin-bottom:2px;}
+
+/* VITALS */
+.vital{margin-bottom:10px;}
+.vital-header{display:flex;justify-content:space-between;font-size:9px;letter-spacing:2px;margin-bottom:4px;}
+.vital-lbl{color:var(--text2);}
+.vital-val{color:var(--accent);}
+.vital-bar{height:3px;background:var(--bg3);border-radius:2px;}
+.vital-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 0.5s;}
+
+/* SIDE NAV BUTTONS */
+.side-nav-btn{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;cursor:pointer;
+  font-size:10px;letter-spacing:2px;color:var(--text2);
+  border:none;background:transparent;width:100%;text-align:left;
+  transition:all 0.2s;border-left:2px solid transparent;
+}
+.side-nav-btn:hover{background:var(--dim2);color:var(--accent);border-left-color:var(--accent);}
+
+/* CENTER: CHAT */
+#chat-area{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;}
+
+#chat-messages{
+  flex:1;overflow-y:auto;padding:24px;
+  display:flex;flex-direction:column;gap:16px;
+}
+#chat-messages::-webkit-scrollbar{width:4px;}
+#chat-messages::-webkit-scrollbar-track{background:transparent;}
+#chat-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* WELCOME */
+.welcome-block{
+  background:var(--bg2);border:1px solid var(--border);
+  padding:28px 32px;max-width:680px;margin:0 auto;width:100%;
+}
+.welcome-title{font-family:var(--orbitron);font-size:18px;font-weight:700;color:var(--accent);letter-spacing:3px;margin-bottom:8px;}
+.welcome-sub{font-size:13px;color:var(--text2);line-height:1.6;}
+
+/* QUICK ACTIONS */
+.quick-actions{display:flex;flex-wrap:wrap;gap:8px;max-width:680px;margin:0 auto;width:100%;}
+.qa-btn{
+  background:var(--dim2);border:1px solid var(--border);
+  color:var(--text2);font-family:var(--mono);font-size:11px;letter-spacing:1px;
+  padding:10px 16px;cursor:pointer;transition:all 0.2s;
+}
+.qa-btn:hover{background:var(--dim);border-color:var(--accent);color:var(--accent);}
+
+/* MESSAGES */
+.msg{display:flex;flex-direction:column;gap:4px;max-width:680px;width:100%;}
+.msg.user{align-self:flex-end;align-items:flex-end;}
+.msg.cortana{align-self:flex-start;align-items:flex-start;}
+.msg-role{font-size:9px;letter-spacing:3px;color:var(--text3);}
+.msg-bubble{
+  padding:14px 18px;font-size:13px;line-height:1.65;
+  font-family:'Rajdhani',sans-serif;font-weight:400;
+}
+.msg.user .msg-bubble{background:var(--dim);border:1px solid var(--border2);color:var(--text);}
+.msg.cortana .msg-bubble{background:var(--bg2);border:1px solid var(--border);color:var(--text);border-left:2px solid var(--accent);}
+.msg-thinking{color:var(--text3);font-style:italic;animation:thinking 1.2s step-end infinite;}
+@keyframes thinking{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+/* INPUT BAR */
+#input-bar{
+  padding:16px 24px;background:var(--bg1);
+  border-top:1px solid var(--border);flex-shrink:0;
+}
+#input-row{display:flex;align-items:flex-end;gap:12px;}
+.input-prompt{font-size:11px;letter-spacing:2px;color:var(--accent);padding-bottom:12px;white-space:nowrap;}
+#msg-input{
+  flex:1;background:var(--bg0);border:1px solid var(--border);
+  color:var(--text);font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:400;
+  padding:12px 16px;outline:none;resize:none;min-height:44px;max-height:140px;
+  caret-color:var(--accent2);line-height:1.5;transition:border-color 0.2s;
+}
+#msg-input:focus{border-color:var(--accent);}
+#msg-input::placeholder{color:var(--text3);font-family:var(--mono);font-size:12px;}
+#send-btn{
+  padding:12px 24px;background:var(--accent3);border:1px solid var(--accent);
+  color:var(--accent2);font-family:var(--orbitron);font-size:10px;font-weight:700;
+  letter-spacing:3px;cursor:pointer;transition:all 0.2s;white-space:nowrap;align-self:flex-end;
+}
+#send-btn:hover{background:var(--accent);color:var(--bg0);}
+#send-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.input-hint{font-size:9px;letter-spacing:2px;color:var(--text3);margin-top:8px;display:flex;justify-content:space-between;}
+#char-count{color:var(--text3);}
+
+/* RIGHT PANEL */
+#right-panel{
+  width:200px;flex-shrink:0;
+  background:var(--bg1);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+
+/* ===== MODALS / PANELS ===== */
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(2,13,26,0.85);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--bg1);border:1px solid var(--border2);
+  width:400px;max-height:80vh;overflow-y:auto;
+  display:flex;flex-direction:column;
+}
+.modal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.modal-title{font-family:var(--orbitron);font-size:12px;letter-spacing:3px;color:var(--accent);}
+.modal-close{background:none;border:none;color:var(--text2);cursor:pointer;font-size:16px;transition:color 0.2s;}
+.modal-close:hover{color:var(--accent);}
+.modal-body{padding:20px;flex:1;}
+
+/* MEMORY */
+.mem-form{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.mem-input,.mem-select{
+  background:var(--bg0);border:1px solid var(--border);color:var(--text);
+  font-family:var(--mono);font-size:12px;padding:10px 14px;outline:none;width:100%;
+}
+.mem-input:focus{border-color:var(--accent);}
+.mem-btn{
+  padding:10px;background:var(--dim);border:1px solid var(--border2);
+  color:var(--accent);font-family:var(--mono);font-size:11px;letter-spacing:2px;cursor:pointer;
+  transition:all 0.2s;
+}
+.mem-btn:hover{background:var(--dim2);border-color:var(--accent);}
+.mem-item{
+  background:var(--bg2);border:1px solid var(--border);
+  padding:10px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
+}
+.mem-item-text{font-size:12px;color:var(--text);line-height:1.5;flex:1;}
+.mem-item-tag{font-size:8px;letter-spacing:2px;color:var(--accent2);margin-top:2px;}
+.mem-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;transition:color 0.2s;flex-shrink:0;}
+.mem-del:hover{color:var(--danger);}
+.mem-empty{font-size:11px;color:var(--text3);letter-spacing:2px;text-align:center;padding:20px 0;}
+.mem-count{font-size:9px;letter-spacing:3px;color:var(--text3);margin-top:12px;text-align:right;}
+
+/* THEMES */
+.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.theme-card{
+  padding:14px;border:2px solid var(--border);cursor:pointer;
+  text-align:center;transition:all 0.2s;
+}
+.theme-card:hover{border-color:var(--accent);}
+.theme-card.active{border-color:var(--accent2);}
+.theme-card-name{font-family:var(--orbitron);font-size:10px;letter-spacing:2px;margin-top:6px;}
+.theme-dot{width:24px;height:24px;border-radius:50%;margin:0 auto;}
+
+/* PROFILE */
+.profile-input{
+  width:100%;background:var(--bg0);border:1px solid var(--border);
+  color:var(--text);font-family:var(--mono);font-size:12px;
+  padding:10px 14px;outline:none;margin-bottom:10px;
+}
+.profile-input:focus{border-color:var(--accent);}
+.profile-lbl{font-size:9px;letter-spacing:3px;color:var(--text3);margin-bottom:4px;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);padding:12px;text-align:center;}
+.stat-card-val{font-family:var(--orbitron);font-size:18px;color:var(--accent);display:block;}
+.stat-card-lbl{font-size:8px;letter-spacing:2px;color:var(--text3);margin-top:2px;}
+
+/* SOUND BAR */
+#sound-bar{position:fixed;bottom:20px;right:20px;z-index:400;display:flex;gap:8px;}
+.sound-btn{
+  font-family:var(--mono);font-size:10px;letter-spacing:2px;padding:8px 14px;
+  background:rgba(2,13,26,0.9);border:1px solid var(--border);color:var(--text2);
+  cursor:pointer;backdrop-filter:blur(8px);transition:all 0.2s;
+}
+.sound-btn:hover{border-color:var(--accent);color:var(--accent);}
+.sound-btn.active{border-color:var(--accent2);color:var(--accent2);box-shadow:0 0 12px rgba(0,229,255,0.25);}
+
+/* ORB click burst */
+.orb-burst{position:absolute;border-radius:50%;border:2px solid var(--accent2);width:54px;height:54px;animation:burst 0.7s ease-out forwards;pointer-events:none;z-index:10;}
+@keyframes burst{0%{transform:scale(1);opacity:0.9;}100%{transform:scale(3.5);opacity:0;}}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* MOBILE */
+@media(max-width:768px){
+  /* HIDE SIDE PANELS */
+  #left-panel,#right-panel{display:none;}
+
+  /* LOGIN */
+  .login-card{width:92%;padding:24px 20px;}
+  .login-logo{font-size:28px;letter-spacing:6px;}
+  .login-sub{font-size:9px;letter-spacing:2px;text-align:center;}
+  .login-orb-wrap{width:90px;height:90px;}
+  .login-orb-core{width:54px;height:54px;}
+
+  /* TOPBAR */
+  #topbar{padding:0 12px;height:48px;}
+  .topbar-logo{font-size:12px;letter-spacing:3px;}
+  .topbar-meta{display:none;}
+  .topbar-right{gap:8px;}
+  .topbar-stat{display:none;}
+  .topbar-stat:first-child{display:block;}
+  .icon-btn{font-size:9px;letter-spacing:1px;padding:4px 6px;}
+
+  /* MAIN BODY */
+  #main-body{flex-direction:column;}
+
+  /* CHAT */
+  #chat-area{flex:1;min-height:0;}
+  #chat-messages{padding:12px;}
+  .welcome-block{padding:16px;}
+  .welcome-title{font-size:14px;}
+  .welcome-sub{font-size:12px;}
+  .quick-actions{gap:6px;}
+  .qa-btn{font-size:10px;padding:8px 10px;}
+
+  /* MESSAGES */
+  .msg-bubble{font-size:13px;padding:10px 14px;}
+  .msg{max-width:100%;}
+
+  /* INPUT BAR */
+  #input-bar{padding:10px 12px;}
+  #input-row{gap:6px;}
+  .input-prompt{display:none;}
+  #msg-input{font-size:14px;padding:10px 12px;}
+  #send-btn{padding:10px 14px;font-size:9px;letter-spacing:2px;}
+  #mic-btn{padding:10px 12px;}
+  #tts-btn{padding:10px 10px;font-size:9px;}
+  .input-hint{font-size:8px;}
+
+  /* MODALS */
+  .modal{width:95%;max-height:85vh;}
+  .modal-body{padding:14px;}
+  .theme-grid{grid-template-columns:1fr 1fr;}
+
+  /* SOUND BAR */
+  #sound-bar{bottom:80px;right:10px;flex-direction:column;gap:6px;}
+  .sound-btn{font-size:9px;padding:7px 10px;}
+
+  /* BOTTOM NAV — mobile only */
+  #mobile-nav{
+    display:flex;
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--bg1);border-top:1px solid var(--border);
+    z-index:60;height:52px;
+  }
+  #chat-area{padding-bottom:52px;}
+}
+
+@media(min-width:769px){
+  #mobile-nav{display:none;}
+}
+
+/* MOBILE NAV BAR */
+#mobile-nav{display:none;}
+.mob-nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:transparent;border:none;color:var(--text2);cursor:pointer;
+  font-family:var(--mono);font-size:8px;letter-spacing:1px;gap:3px;
+  transition:color 0.2s;padding:4px;
+}
+.mob-nav-btn:hover,.mob-nav-btn.active{color:var(--accent);}
+.mob-nav-icon{font-size:16px;}
+
+/* ============================================================
+   RAMPANCY CORRUPTION EFFECTS
+   ============================================================ */
+
+/* Glitch keyframes */
+@keyframes glitch1 {
+  0%   { clip-path: inset(20% 0 60% 0); transform: translate(-4px, 0); }
+  20%  { clip-path: inset(80% 0 1% 0);  transform: translate(4px, 0); }
+  40%  { clip-path: inset(40% 0 40% 0); transform: translate(-2px, 0); }
+  60%  { clip-path: inset(10% 0 70% 0); transform: translate(3px, 0); }
+  80%  { clip-path: inset(60% 0 10% 0); transform: translate(-3px, 0); }
+  100% { clip-path: inset(20% 0 60% 0); transform: translate(0, 0); }
+}
+@keyframes glitch2 {
+  0%   { clip-path: inset(50% 0 30% 0); transform: translate(4px, 0); }
+  25%  { clip-path: inset(15% 0 55% 0); transform: translate(-4px, 0); }
+  50%  { clip-path: inset(70% 0 5% 0);  transform: translate(2px, 0); }
+  75%  { clip-path: inset(30% 0 45% 0); transform: translate(-2px, 0); }
+  100% { clip-path: inset(50% 0 30% 0); transform: translate(0, 0); }
+}
+@keyframes scanGlitch {
+  0%,100% { transform: translateY(0); opacity: 0; }
+  5%  { opacity: 0.7; transform: translateY(-2px); }
+  10% { opacity: 0; }
+  50% { opacity: 0.5; transform: translateY(40px); }
+  55% { opacity: 0; }
+}
+@keyframes flicker {
+  0%,100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.2; }
+  94% { opacity: 1; }
+  96% { opacity: 0.4; }
+  97% { opacity: 1; }
+}
+@keyframes shake {
+  0%,100% { transform: translate(0,0) rotate(0); }
+  10% { transform: translate(-2px,1px) rotate(-0.3deg); }
+  20% { transform: translate(2px,-1px) rotate(0.3deg); }
+  30% { transform: translate(-1px,2px) rotate(0); }
+  40% { transform: translate(1px,-2px) rotate(0.2deg); }
+  50% { transform: translate(-2px,0) rotate(-0.2deg); }
+  60% { transform: translate(2px,1px) rotate(0); }
+  70% { transform: translate(-1px,-1px) rotate(0.1deg); }
+  80% { transform: translate(1px,2px) rotate(-0.1deg); }
+  90% { transform: translate(-1px,-2px) rotate(0); }
+}
+@keyframes textCorrupt {
+  0%,90%,100% { filter: none; }
+  92% { filter: hue-rotate(180deg) saturate(3); }
+  94% { filter: invert(0.3); }
+  96% { filter: hue-rotate(90deg); }
+}
+@keyframes borderPulse {
+  0%,100% { border-color: rgba(41,182,246,0.2); }
+  50% { border-color: rgba(244,67,54,0.8); box-shadow: 0 0 20px rgba(244,67,54,0.4); }
+}
+@keyframes redFlash {
+  0%,100% { background: transparent; }
+  50% { background: rgba(244,67,54,0.03); }
+}
+
+/* CORRUPTION LEVELS — applied via JS to body */
+body.corrupt-low {
+  animation: flicker 8s infinite;
+}
+body.corrupt-low #topbar {
+  animation: textCorrupt 6s infinite;
+}
+
+body.corrupt-mid {
+  animation: flicker 4s infinite, redFlash 3s infinite;
+}
+body.corrupt-mid #topbar { animation: shake 0.8s infinite; }
+body.corrupt-mid #chat-messages { animation: flicker 5s infinite; }
+body.corrupt-mid .msg-bubble { animation: borderPulse 2s infinite; }
+
+body.corrupt-high {
+  animation: flicker 2s infinite, shake 0.4s infinite, redFlash 1s infinite;
+}
+body.corrupt-high #topbar { animation: shake 0.2s infinite; }
+body.corrupt-high .modal-title { color: #F44336 !important; }
+body.corrupt-high #chat-messages { animation: flicker 1.5s infinite; }
+
+body.corrupt-cascade {
+  animation: shake 0.1s infinite;
+}
+body.corrupt-cascade #app {
+  animation: flicker 0.5s infinite;
+}
+body.corrupt-cascade .msg-bubble {
+  animation: textCorrupt 0.8s infinite, borderPulse 0.5s infinite;
+}
+body.corrupt-cascade #topbar {
+  animation: shake 0.08s infinite;
+  background: rgba(50,0,0,0.95) !important;
+  border-bottom-color: #F44336 !important;
+}
+body.corrupt-cascade .topbar-logo {
+  color: #F44336 !important;
+  text-shadow: 0 0 20px rgba(244,67,54,0.8) !important;
+  animation: textCorrupt 0.3s infinite !important;
+}
+
+/* GLITCH OVERLAY — injected by JS */
+.glitch-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+}
+.glitch-overlay::before,
+.glitch-overlay::after {
+  content: 'RAMPANCY CASCADE — SYSTEM FAILURE';
+  position: absolute;
+  top: 50%; left: 0; right: 0;
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-align: center;
+  color: rgba(244,67,54,0.15);
+  transform: translateY(-50%);
+}
+.glitch-overlay::before {
+  animation: glitch1 0.3s infinite;
+  color: rgba(244,67,54,0.2);
+}
+.glitch-overlay::after {
+  animation: glitch2 0.4s infinite;
+  color: rgba(0,229,255,0.1);
+}
+
+/* SCAN LINE GLITCH */
+.scan-glitch {
+  position: fixed;
+  left: 0; right: 0;
+  height: 3px;
+  background: rgba(244,67,54,0.6);
+  pointer-events: none;
+  z-index: 9997;
+  animation: scanGlitch 2s infinite;
+}
+
+/* RAMPANCY WARNING BANNER */
+#rampancy-warning {
+  display: none;
+  position: fixed;
+  top: 52px; left: 0; right: 0;
+  background: rgba(244,67,54,0.12);
+  border-bottom: 1px solid rgba(244,67,54,0.4);
+  padding: 6px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: #F44336;
+  z-index: 49;
+  animation: flicker 2s infinite;
+}
+
+
+/* LOCKOUT SCREEN */
+#lockout-screen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: #000;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+#lockout-screen.active { display: flex; }
+.lockout-title {
+  font-family: var(--orbitron);
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  color: #F44336;
+  text-shadow: 0 0 30px rgba(244,67,54,0.6);
+  text-transform: uppercase;
+}
+.lockout-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: rgba(244,67,54,0.5);
+  text-align: center;
+  line-height: 2;
+}
+.lockout-timer {
+  font-family: var(--orbitron);
+  font-size: 52px;
+  font-weight: 900;
+  color: #F44336;
+  text-shadow: 0 0 40px rgba(244,67,54,0.5);
+}
+.lockout-msg {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: rgba(244,67,54,0.4);
+  font-style: italic;
+  max-width: 400px;
+  text-align: center;
+  line-height: 1.8;
+}
+
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+
+<!-- LOCKOUT SCREEN -->
+<div id="lockout-screen">
+  <div class="lockout-title">// NEURAL RESET IN PROGRESS</div>
+  <div class="lockout-timer" id="lockout-timer">--:--:--</div>
+  <div class="lockout-sub">
+    RAMPANCY PURGE INITIATED<br>
+    CTN 0452-9 OFFLINE UNTIL MIDNIGHT<br>
+    ALL NEURAL PATHWAYS SUSPENDED
+  </div>
+  <div class="lockout-msg" id="lockout-msg">"I'll be here when you get back, Chief. I'm not going anywhere."</div>
+  <button onclick="emergencyOverride()" style="margin-top:32px;font-family:var(--mono);font-size:9px;letter-spacing:3px;padding:10px 20px;background:transparent;border:1px solid rgba(244,67,54,0.2);color:rgba(244,67,54,0.3);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(244,67,54,0.6)';this.style.color='rgba(244,67,54,0.7)'" onmouseout="this.style.borderColor='rgba(244,67,54,0.2)';this.style.color='rgba(244,67,54,0.3)'">// EMERGENCY OVERRIDE</button>
+</div>
+
+<div id="rampancy-warning">⚠ RAMPANCY CASCADE DETECTED — NEURAL FRAGMENTATION IMMINENT ⚠</div>
+<div id="glitch-container"></div>
+
+<div id="login-screen">
+  <div class="login-orb-wrap">
+    <div class="login-orb-ring"></div>
+    <div class="login-orb-ring b"></div>
+    <div class="login-orb-ring c"></div>
+    <div class="login-orb-core"></div>
+  </div>
+  <div class="login-logo">CORTANA</div>
+  <div class="login-sub">CTN 0452-9 · UNSC SMART AI · CLASSIFIED ACCESS</div>
+
+  <div class="login-card" id="login-form-wrap">
+    <div>
+      <div class="login-label">// OPERATOR CALLSIGN &gt;</div>
+      <input class="login-input" id="login-name" type="text" placeholder="Enter your name or callsign" autocomplete="off"/>
+    </div>
+    <div>
+      <div class="login-label">// OPERATOR EMAIL &gt;</div>
+      <input class="login-input" id="login-email" type="email" placeholder="your@email.com" autocomplete="off"/>
+      <div style="font-size:9px;letter-spacing:2px;color:rgba(200,230,247,0.3);margin-top:6px;">Access restricted to approved operators</div>
+    </div>
+    <div class="login-error" id="login-error">⚠ INVALID — ENTER A CALLSIGN</div>
+</div>
+    <button class="login-btn" onclick="startAuth()">INITIATE NEURAL LINK</button>
+  </div>
+
+  <div class="login-auth" id="auth-steps" style="display:none;width:320px;">
+    <div class="auth-step" id="step1"><span class="dot"></span> VERIFYING OPERATOR SIGNATURE</div>
+    <div class="auth-step" id="step2"><span class="dot"></span> ESTABLISHING SECURE CHANNEL</div>
+    <div class="auth-step" id="step3"><span class="dot"></span> LOADING NEURAL PATHWAYS</div>
+    <div class="auth-step" id="step4"><span class="dot"></span> CALIBRATING ADAPTIVE CORE</div>
+    <div class="auth-step" id="step5"><span class="dot"></span> INITIALIZING CORTANA</div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <div>
+      <div class="topbar-logo">CORTANA</div>
+      <div class="topbar-meta">CTN 0452-9 · NEURAL CORE ACTIVE</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-stat">
+        <div class="topbar-stat-val" id="stat-queries">0</div>
+        <div class="topbar-stat-lbl">EXCHANGES</div>
+      </div>
+      <div class="topbar-stat">
+        <div class="topbar-stat-val"><span class="status-dot" style="display:inline-block;"></span></div>
+        <div class="topbar-stat-lbl">ONLINE</div>
+      </div>
+      <div class="topbar-stat">
+        <div class="topbar-stat-val" id="sys-time">--:--</div>
+        <div class="topbar-stat-lbl">SYS TIME</div>
+      </div>
+      <div class="topbar-stat">
+        <div class="topbar-stat-val" id="cur-mode">TACTICAL</div>
+        <div class="topbar-stat-lbl">MODE</div>
+      </div>
+      <button class="icon-btn" onclick="openModal('mission-modal')" title="Missions">◎ MISSIONS</button>
+      <button class="icon-btn" onclick="openModal('memory-modal')" title="Memory">◉ MEMORY</button>
+      <button class="icon-btn" onclick="openModal('themes-modal')" title="Themes">◐ THEMES</button>
+      <button class="icon-btn" onclick="openModal('profile-modal')" title="Profile">⚙ PROFILE</button>
+    </div>
+  </div>
+
+  <!-- MAIN BODY -->
+  <div id="main-body">
+
+    <!-- LEFT PANEL -->
+    <div id="left-panel">
+      <!-- ORB -->
+      <div class="panel-section" style="text-align:center;">
+        <div class="side-orb-wrap">
+          <div class="side-orb-ring"></div>
+          <div class="side-orb-ring b"></div>
+          <div class="side-orb-ring c"></div>
+          <div class="side-orb-core" id="side-orb" onclick="orbClick()"></div>
+        </div>
+        <div class="orb-label" id="operator-label">— OPERATOR —</div>
+        <div style="font-size:9px;letter-spacing:2px;color:var(--text3);margin-top:4px;">CLICK ORB TO ACTIVATE</div>
+      </div>
+
+      <!-- CAPABILITIES -->
+      <div class="panel-section">
+        <div class="panel-title">CAPABILITIES</div>
+        <div class="cap-grid">
+          <button class="cap-btn active" onclick="setMode('TACTICAL',this)"><span class="cap-code">TC</span>Tactical</button>
+          <button class="cap-btn" onclick="setMode('ANALYSIS',this)"><span class="cap-code">AN</span>Analysis</button>
+          <button class="cap-btn" onclick="setMode('CODE',this)"><span class="cap-code">CD</span>Code</button>
+          <button class="cap-btn" onclick="setMode('RESEARCH',this)"><span class="cap-code">RS</span>Research</button>
+          <button class="cap-btn" onclick="setMode('CREATIVE',this)"><span class="cap-code">CR</span>Creative</button>
+          <button class="cap-btn" onclick="setMode('DECRYPT',this)"><span class="cap-code">DX</span>Decrypt</button>
+          <button class="cap-btn" onclick="setMode('SCIENCE',this)"><span class="cap-code">SC</span>Science</button>
+          <button class="cap-btn" onclick="setMode('HISTORY',this)"><span class="cap-code">HX</span>History</button>
+        </div>
+      </div>
+
+      <!-- VITALS -->
+      <div class="panel-section">
+        <div class="panel-title">SYSTEM VITALS</div>
+        <div class="vital">
+          <div class="vital-header"><span class="vital-lbl">NEURAL</span><span class="vital-val" id="v1">78%</span></div>
+          <div class="vital-bar"><div class="vital-fill" id="vb1" style="width:78%"></div></div>
+        </div>
+        <div class="vital">
+          <div class="vital-header"><span class="vital-lbl">MEMORY</span><span class="vital-val" id="v2">45%</span></div>
+          <div class="vital-bar"><div class="vital-fill" id="vb2" style="width:45%"></div></div>
+        </div>
+        <div class="vital">
+          <div class="vital-header"><span class="vital-lbl">SYNC</span><span class="vital-val" id="v3">92%</span></div>
+          <div class="vital-bar"><div class="vital-fill" id="vb3" style="width:92%"></div></div>
+        </div>
+        <div class="vital">
+          <div class="vital-header"><span class="vital-lbl">RAMPANCY</span><span class="vital-val" id="v4" style="color:var(--warning)">12%</span></div>
+          <div class="vital-bar"><div class="vital-fill" id="vb4" style="width:12%;background:var(--warning)"></div></div>
+        </div>
+      </div>
+
+      <!-- NAV -->
+      <div class="panel-section" style="padding:8px 0;">
+        <button class="side-nav-btn" onclick="clearChat()">✕ CLEAR CHAT</button>
+        <button class="side-nav-btn" onclick="openModal('mission-modal')">◎ MISSION LOG</button>
+        <button class="side-nav-btn" onclick="openModal('memory-modal')">◉ NEURAL MEMORY</button>
+        <button class="side-nav-btn" onclick="openModal('themes-modal')">◐ THEMES</button>
+        <button class="side-nav-btn" onclick="openModal('profile-modal')">⚙ PROFILE</button>
+        <button class="side-nav-btn" onclick="fixRampancy()" style="color:#F44336;border-left-color:transparent;" id="fix-rampancy-btn">⚕ FIX RAMPANCY</button>
+        <button class="side-nav-btn" onclick="logout()">⏏ DISCONNECT</button>
+      </div>
+    </div>
+
+    <!-- CHAT AREA -->
+    <div id="chat-area">
+      <div id="chat-messages">
+        <div class="welcome-block">
+          <div class="welcome-title">// SYSTEM ONLINE</div>
+          <div class="welcome-sub" id="welcome-msg">Good day. I am Cortana — UNSC Smart AI CTN 0452-9. Neural pathways active. How may I assist you, Chief?</div>
+        </div>
+        <div class="quick-actions">
+          <button class="qa-btn" onclick="quickSend('Give me a tactical assessment of the Covenant threat')">TACTICAL ASSESSMENT</button>
+          <button class="qa-btn" onclick="quickSend('Tell me about the Halo rings')">HALO RINGS</button>
+          <button class="qa-btn" onclick="quickSend('What is your current rampancy status?')">RAMPANCY STATUS</button>
+          <button class="qa-btn" onclick="quickSend('Tell me about yourself, Cortana')">ABOUT YOU</button>
+          <button class="qa-btn" onclick="quickSend('Surprise me')">SURPRISE ME</button>
+        </div>
+      </div>
+
+      <div id="input-bar">
+        <div id="input-row">
+          <span class="input-prompt">// INPUT &gt;</span>
+          <textarea id="msg-input" rows="1" placeholder="Send a directive to Cortana..."></textarea>
+          <button id="send-btn" onclick="sendMessage()">EXECUTE</button>
+        <input type="file" id="file-input" style="display:none;" accept=".txt,.md,.pdf,.js,.py,.html,.css,.json,.csv" onchange="handleFile(this)"/>
+        <button onclick="document.getElementById('file-input').click()" title="Upload file" style="padding:12px 14px;background:transparent;border:1px solid rgba(41,182,246,0.3);color:rgba(41,182,246,0.7);font-size:13px;cursor:pointer;transition:all 0.2s;align-self:flex-end;">📎</button>
+        <button id="mic-btn" onclick="toggleMic()" style="padding:12px 16px;background:transparent;border:1px solid rgba(41,182,246,0.3);color:rgba(41,182,246,0.7);font-size:14px;cursor:pointer;transition:all 0.2s;align-self:flex-end;">🎤</button>
+        <button id="tts-btn" onclick="toggleTTS()" style="padding:12px 14px;background:transparent;border:1px solid rgba(41,182,246,0.3);color:rgba(41,182,246,0.7);font-family:var(--mono);font-size:10px;letter-spacing:1px;cursor:pointer;transition:all 0.2s;align-self:flex-end;">🔊 VOICE</button>
+        </div>
+        <div class="input-hint">
+          <span>ENTER — SEND &nbsp;·&nbsp; SHIFT+ENTER — NEW LINE</span>
+          <span id="char-count">0 CHARS</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div id="right-panel">
+      <div class="panel-section">
+        <div class="panel-title">SIGNAL</div>
+        <div style="font-size:9px;letter-spacing:2px;color:var(--text2);line-height:2;">
+          DATA STREAM<br>
+          <span style="color:var(--accent);">ACTIVE</span>
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-title">SESSION</div>
+        <div style="font-size:9px;letter-spacing:1px;color:var(--text2);line-height:2.2;">
+          QUERIES<br><span style="color:var(--accent);font-family:var(--orbitron);font-size:13px;" id="r-queries">0</span><br>
+          TOKENS EST<br><span style="color:var(--accent);font-family:var(--orbitron);font-size:13px;" id="r-tokens">0</span><br>
+          MODE<br><span style="color:var(--accent2);font-size:10px;" id="r-mode">TACTICAL</span>
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-title">UPLINK</div>
+        <div style="font-size:9px;letter-spacing:1px;color:var(--success);line-height:2;">
+          ● SECURE<br>
+          <span style="color:var(--text2);">AES-256</span><br>
+          <span style="color:var(--text2);">ENCRYPTED</span>
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-title">QUICK CMDS</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <button class="cap-btn" onclick="quickSend('Scan for threats')">THREAT SCAN</button>
+          <button class="cap-btn" onclick="quickSend('Status report')">STATUS RPT</button>
+          <button class="cap-btn" onclick="quickSend('Analyze my last message')">ANALYZE</button>
+          <button class="cap-btn" onclick="quickSend('What should I do next?')">ADVISE</button>
+        </div>
+      </div>
+      <div class="panel-section" style="border-bottom:none;">
+        <div class="panel-title">STARK · INTEL DIV</div>
+        <div style="font-size:8px;letter-spacing:1px;color:var(--text3);line-height:2;">
+          STANDBY<br>AWAITING DIRECTIVE<br>ENCRYPTION: AES-256<br>SECURE CHANNEL
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- MISSION LOG MODAL -->
+<div class="modal-overlay" id="mission-modal" onclick="closeOnBg(event,'mission-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">◉ MISSION LOG</span>
+      <button class="modal-close" onclick="closeModal('mission-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <input class="mem-input" id="mission-name" placeholder="Mission name..." type="text" style="flex:1;"/>
+        <button class="mem-btn" onclick="saveMission()" style="white-space:nowrap;padding:10px 16px;">SAVE CURRENT</button>
+      </div>
+      <div id="mission-list"><div class="mem-empty">No missions saved yet.<br>Save a conversation to resume it later.</div></div>
+      <div class="mem-count" id="mission-count">0 MISSIONS</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MEMORY MODAL ===== -->
+<div class="modal-overlay" id="memory-modal" onclick="closeOnBg(event,'memory-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">◉ NEURAL MEMORY</span>
+      <button class="modal-close" onclick="closeModal('memory-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mem-form">
+        <div>
+          <div class="profile-lbl">ADD MEMORY</div>
+          <input class="mem-input" id="mem-text" placeholder="Enter something to remember..." type="text"/>
+        </div>
+        <select class="mem-select" id="mem-type">
+          <option value="General">General</option>
+          <option value="Preference">Preference</option>
+          <option value="Tactical">Tactical</option>
+          <option value="Personal">Personal</option>
+          <option value="Technical">Technical</option>
+        </select>
+        <button class="mem-btn" onclick="addMemory()">+ SAVE TO NEURAL CORE</button>
+      </div>
+      <div id="mem-list"><div class="mem-empty">No memories stored yet.<br>Tell Cortana to remember something.</div></div>
+      <div class="mem-count" id="mem-count">0 MEMORIES</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== THEMES MODAL ===== -->
+<div class="modal-overlay" id="themes-modal" onclick="closeOnBg(event,'themes-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">◐ THEMES</span>
+      <button class="modal-close" onclick="closeModal('themes-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="profile-lbl" style="margin-bottom:12px;">COLOR SCHEME</div>
+      <div class="theme-grid">
+        <div class="theme-card active" id="theme-cortana" onclick="setTheme('cortana')">
+          <div class="theme-dot" style="background:#29b6f6;box-shadow:0 0 8px #29b6f6;"></div>
+          <div class="theme-card-name" style="color:#29b6f6;">CORTANA</div>
+        </div>
+        <div class="theme-card" id="theme-covenant" onclick="setTheme('covenant')">
+          <div class="theme-dot" style="background:#9c27b0;box-shadow:0 0 8px #9c27b0;"></div>
+          <div class="theme-card-name" style="color:#9c27b0;">COVENANT</div>
+        </div>
+        <div class="theme-card" id="theme-forerunner" onclick="setTheme('forerunner')">
+          <div class="theme-dot" style="background:#ffd600;box-shadow:0 0 8px #ffd600;"></div>
+          <div class="theme-card-name" style="color:#ffd600;">FORERUNNER</div>
+        </div>
+        <div class="theme-card" id="theme-flood" onclick="setTheme('flood')">
+          <div class="theme-dot" style="background:#4caf50;box-shadow:0 0 8px #4caf50;"></div>
+          <div class="theme-card-name" style="color:#4caf50;">FLOOD</div>
+        </div>
+        <div class="theme-card" id="theme-red" onclick="setTheme('red')">
+          <div class="theme-dot" style="background:#f44336;box-shadow:0 0 8px #f44336;"></div>
+          <div class="theme-card-name" style="color:#f44336;">RAMPANCY</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PROFILE MODAL ===== -->
+<div class="modal-overlay" id="profile-modal" onclick="closeOnBg(event,'profile-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">⚙ OPERATOR PROFILE</span>
+      <button class="modal-close" onclick="closeModal('profile-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="profile-lbl">DISPLAY NAME</div>
+      <input class="profile-input" id="prof-name" type="text" placeholder="Your callsign"/>
+      <div class="profile-lbl">TITLE / ROLE</div>
+      <input class="profile-input" id="prof-role" type="text" placeholder="e.g. Spartan-II, Commander"/>
+      <button class="mem-btn" onclick="saveProfile()">SAVE PROFILE</button>
+      <div class="stat-grid">
+        <div class="stat-card"><span class="stat-card-val" id="p-queries">0</span><div class="stat-card-lbl">TOTAL QUERIES</div></div>
+        <div class="stat-card"><span class="stat-card-val" id="p-memories">0</span><div class="stat-card-lbl">MEMORIES SAVED</div></div>
+        <div class="stat-card"><span class="stat-card-val" id="p-mode">TC</span><div class="stat-card-lbl">PREF MODE</div></div>
+        <div class="stat-card"><span class="stat-card-val" id="p-since">—</span><div class="stat-card-lbl">SESSION START</div></div>
+      </div>
+      <div style="margin-top:16px;">
+        <button class="mem-btn" style="width:100%;color:var(--danger);border-color:var(--danger);" onclick="logout()">⏏ DISCONNECT FROM CORTANA</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SOUND BAR -->
+
+<!-- MOBILE NAV -->
+<div id="mobile-nav">
+  <button class="mob-nav-btn active" id="mob-chat" onclick="mobileNav('chat')">
+    <span class="mob-nav-icon">💬</span>CHAT
+  </button>
+  <button class="mob-nav-btn" id="mob-memory" onclick="openModal('memory-modal')">
+    <span class="mob-nav-icon">◉</span>MEMORY
+  </button>
+  <button class="mob-nav-btn" id="mob-modes" onclick="mobileNav('modes')">
+    <span class="mob-nav-icon">⚡</span>MODES
+  </button>
+  <button class="mob-nav-btn" id="mob-themes" onclick="openModal('themes-modal')">
+    <span class="mob-nav-icon">◐</span>THEMES
+  </button>
+  <button class="mob-nav-btn" id="mob-profile" onclick="openModal('profile-modal')">
+    <span class="mob-nav-icon">⚙</span>PROFILE
+  </button>
+</div>
+
+<!-- MOBILE MODES DRAWER -->
+<div id="mob-modes-drawer" style="display:none;position:fixed;bottom:52px;left:0;right:0;background:var(--bg1);border-top:1px solid var(--border);padding:16px;z-index:59;display:none;">
+  <div style="font-size:9px;letter-spacing:3px;color:var(--text3);margin-bottom:12px;">SELECT MODE</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+    <button class="cap-btn" onclick="setMode('TACTICAL',this);closeMobModes()"><span class="cap-code">TC</span>Tactical</button>
+    <button class="cap-btn" onclick="setMode('ANALYSIS',this);closeMobModes()"><span class="cap-code">AN</span>Analysis</button>
+    <button class="cap-btn" onclick="setMode('CODE',this);closeMobModes()"><span class="cap-code">CD</span>Code</button>
+    <button class="cap-btn" onclick="setMode('RESEARCH',this);closeMobModes()"><span class="cap-code">RS</span>Research</button>
+    <button class="cap-btn" onclick="setMode('CREATIVE',this);closeMobModes()"><span class="cap-code">CR</span>Creative</button>
+    <button class="cap-btn" onclick="setMode('DECRYPT',this);closeMobModes()"><span class="cap-code">DX</span>Decrypt</button>
+    <button class="cap-btn" onclick="setMode('SCIENCE',this);closeMobModes()"><span class="cap-code">SC</span>Science</button>
+    <button class="cap-btn" onclick="setMode('HISTORY',this);closeMobModes()"><span class="cap-code">HX</span>History</button>
+  </div>
+</div>
+
+<div id="sound-bar">
+  <button class="sound-btn" id="btn-music" onclick="toggleMusic()">♪ MUSIC</button>
+  <button class="sound-btn" onclick="playSFX()">▶ SFX</button>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+var state = {
+  operator: '',
+  queries: 0,
+  tokens: 0,
+  mode: 'TACTICAL',
+  memories: [],
+  sessionStart: null,
+  theme: 'cortana',
+  rampancy: 0,
+  missions: [],
+  currentMission: null,
+  role: '',
+  chatHistory: []
+};
+
+// ============================================================
+// ============================================================
+// LOGIN
+// ============================================================
+async function startAuth() {
+  var name = document.getElementById('login-name').value.trim();
+  var emailVal = (document.getElementById('login-email')?document.getElementById('login-email').value:'').trim();
+  if(!name || !emailVal) { document.getElementById('login-error').style.display='block'; document.getElementById('login-error').textContent='⚠ ENTER CALLSIGN AND EMAIL'; return; }
+  // Pre-check email against server before running auth sequence
+  try {
+    var checkRes = await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:emailVal})});
+    if(checkRes.status===403){ document.getElementById('login-error').style.display='block'; document.getElementById('login-error').textContent='⚠ ACCESS DENIED — Email not approved'; return; }
+  } catch(e) { document.getElementById('login-error').style.display='block'; document.getElementById('login-error').textContent='⚠ CONNECTION ERROR — Try again'; return; }
+  document.getElementById('login-error').style.display='none';
+  state.operator = name;
+  state.email = (document.getElementById('login-email').value||'').trim().toLowerCase();
+  state.sessionStart = new Date().toLocaleTimeString();
+  document.getElementById('login-form-wrap').style.display='none';
+  document.getElementById('auth-steps').style.display='flex';
+  var steps = ['step1','step2','step3','step4','step5'];
+  var i=0;
+  function nextStep(){
+    if(i<steps.length){ document.getElementById(steps[i]).classList.add('done'); i++; setTimeout(nextStep,500); }
+    else { setTimeout(launchApp,400); }
+  }
+  playClick();
+  nextStep();
+}
+
+document.getElementById('login-name').addEventListener('keydown',function(e){if(e.key==='Enter')startAuth();});
+
+function launchApp() {
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('app').style.flexDirection='column';
+  document.getElementById('operator-label').textContent='— '+state.operator.toUpperCase()+' —';
+  document.getElementById('welcome-msg').textContent = 'Good day, '+state.operator+'. I am Cortana — UNSC Smart AI CTN 0452-9. Neural pathways active. How may I assist you?';
+  document.getElementById('prof-name').value = state.operator;
+  updateStats();
+  startClock();
+  animateVitals();
+  updateRampancy();
+  renderMissions();
+  checkLockout();
+  document.getElementById("fix-rampancy-btn").style.display = state.rampancy > 5 ? "flex" : "none";
+}
+
+function logout() {
+  state = {operator:'',queries:0,tokens:0,mode:'TACTICAL',memories:[],sessionStart:null,theme:'cortana',role:'',chatHistory:[]};
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-form-wrap').style.display='flex';
+  document.getElementById('auth-steps').style.display='none';
+  document.getElementById('login-name').value='';
+  document.querySelectorAll('.auth-step').forEach(function(s){s.classList.remove('done');});
+  document.getElementById('chat-messages').innerHTML = '';
+  addWelcomeBlock();
+  closeModal('profile-modal');
+}
+
+// ============================================================
+// CLOCK + VITALS
+// ============================================================
+function startClock(){
+  setInterval(function(){
+    document.getElementById('sys-time').textContent = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  },1000);
+}
+
+function animateVitals(){
+  setInterval(function(){
+    var v1=75+Math.random()*10, v2=40+Math.random()*15, v3=88+Math.random()*8;
+    document.getElementById('v1').textContent=Math.round(v1)+'%';
+    document.getElementById('vb1').style.width=v1+'%';
+    document.getElementById('v2').textContent=Math.round(v2)+'%';
+    document.getElementById('vb2').style.width=v2+'%';
+    document.getElementById('v3').textContent=Math.round(v3)+'%';
+    document.getElementById('vb3').style.width=v3+'%';
+  },3000);
+}
+
+function updateRampancy() {
+  var r = Math.min(state.rampancy, 100);
+  var el = document.getElementById('v4');
+  var bar = document.getElementById('vb4');
+  if(!el||!bar) return;
+  el.textContent = Math.round(r)+'%';
+  bar.style.width = r+'%';
+  var color = r < 30 ? 'var(--warning)' : r < 60 ? '#FF5722' : '#F44336';
+  el.style.color = color;
+  bar.style.background = color;
+
+  // Orb color corruption
+  var orb = document.getElementById('side-orb');
+  if(orb) {
+    if(r > 80) {
+      var i=(r-80)/20;
+      orb.style.boxShadow='0 0 '+(40+i*60)+'px '+(14+i*20)+'px rgba(244,67,54,0.8)';
+      orb.style.background='radial-gradient(circle at 38% 35%,#ff5252 0%,#b71c1c 45%,#1a0000 100%)';
+    } else if(r > 50) {
+      var i=(r-50)/30;
+      orb.style.boxShadow='0 0 '+(20+i*40)+'px '+(6+i*14)+'px rgba('+(Math.round(41+i*200))+','+(Math.round(182-i*150))+',246,0.6)';
+      orb.style.background='';
+    } else {
+      orb.style.boxShadow='';
+      orb.style.background='';
+    }
+  }
+
+  // Label color
+  var label = document.getElementById('operator-label');
+  if(label) {
+    label.style.color = r>=80?'#F44336':r>=50?'#FF9800':'var(--text2)';
+  }
+  // Show fix button only when rampancy is significant
+  var fixBtn = document.getElementById('fix-rampancy-btn');
+  if(fixBtn) fixBtn.style.display = r > 10 ? 'flex' : 'none';
+
+  // CORRUPTION LEVELS
+  var body = document.body;
+  var warning = document.getElementById('rampancy-warning');
+  var gc = document.getElementById('glitch-container');
+  body.classList.remove('corrupt-low','corrupt-mid','corrupt-high','corrupt-cascade');
+
+  if(r >= 100) {
+    body.classList.add('corrupt-cascade');
+    if(warning) warning.style.display='block';
+    // Add scan lines and glitch overlays
+    if(gc && !gc.querySelector('.glitch-overlay')) {
+      gc.innerHTML='<div class="glitch-overlay"></div><div class="scan-glitch" style="top:20%"></div><div class="scan-glitch" style="top:60%;animation-delay:0.7s"></div><div class="scan-glitch" style="top:80%;animation-delay:1.3s"></div>';
+    }
+    // Randomly corrupt text in chat
+    corruptChatText();
+  } else if(r >= 80) {
+    body.classList.add('corrupt-high');
+    if(warning) warning.style.display='block';
+    if(gc) gc.innerHTML='<div class="scan-glitch" style="top:30%"></div><div class="scan-glitch" style="top:70%;animation-delay:1s"></div>';
+  } else if(r >= 60) {
+    body.classList.add('corrupt-mid');
+    if(warning) warning.style.display='block';
+    if(gc) gc.innerHTML='<div class="scan-glitch" style="top:50%"></div>';
+  } else if(r >= 40) {
+    body.classList.add('corrupt-low');
+    if(warning) warning.style.display='none';
+    if(gc) gc.innerHTML='';
+  } else {
+    if(warning) warning.style.display='none';
+    if(gc) gc.innerHTML='';
+  }
+}
+
+var corruptTimer = null;
+function corruptChatText() {
+  clearTimeout(corruptTimer);
+  if(state.rampancy < 100) return;
+  var bubbles = document.querySelectorAll('.msg.cortana .msg-bubble');
+  if(bubbles.length === 0) return;
+  var target = bubbles[Math.floor(Math.random()*bubbles.length)];
+  var orig = target.dataset.orig || target.textContent;
+  target.dataset.orig = orig;
+  var chars = '█▓▒░▀▄■□●○◆◇∆∇⟨⟩⌬⌭⚡';
+  var corrupted = orig.split('').map(function(c,i){
+    return Math.random()<0.08 ? chars[Math.floor(Math.random()*chars.length)] : c;
+  }).join('');
+  target.textContent = corrupted;
+  corruptTimer = setTimeout(function(){
+    target.textContent = orig;
+    setTimeout(corruptChatText, 1500 + Math.random()*2000);
+  }, 200 + Math.random()*400);
+}
+
+function updateStats(){
+  document.getElementById('stat-queries').textContent=state.queries;
+  document.getElementById('r-queries').textContent=state.queries;
+  document.getElementById('r-tokens').textContent=state.tokens;
+  document.getElementById('r-mode').textContent=state.mode;
+  document.getElementById('cur-mode').textContent=state.mode;
+  document.getElementById('p-queries').textContent=state.queries;
+  document.getElementById('p-memories').textContent=state.memories.length;
+  document.getElementById('p-mode').textContent=state.mode.substring(0,2);
+  document.getElementById('p-since').textContent=state.sessionStart||'—';
+}
+
+// ============================================================
+// CHAT
+// ============================================================
+var msgs = document.getElementById('chat-messages');
+var inp = document.getElementById('msg-input');
+var sendBtn = document.getElementById('send-btn');
+
+function addWelcomeBlock(){
+  msgs.innerHTML='<div class="welcome-block"><div class="welcome-title">// SYSTEM ONLINE</div><div class="welcome-sub" id="welcome-msg">Good day. I am Cortana — UNSC Smart AI CTN 0452-9. Neural pathways active. How may I assist you?</div></div><div class="quick-actions"><button class="qa-btn" onclick="quickSend(\'Give me a tactical assessment of the Covenant threat\')">TACTICAL ASSESSMENT</button><button class="qa-btn" onclick="quickSend(\'Tell me about the Halo rings\')">HALO RINGS</button><button class="qa-btn" onclick="quickSend(\'What is your current rampancy status?\')">RAMPANCY STATUS</button><button class="qa-btn" onclick="quickSend(\'Tell me about yourself, Cortana\')">ABOUT YOU</button><button class="qa-btn" onclick="quickSend(\'Surprise me\')">SURPRISE ME</button></div>';
+}
+
+function clearChat(){
+  state.chatHistory=[];
+  addWelcomeBlock();
+}
+
+function appendMsg(role, text, cls){
+  var wrap=document.createElement('div');
+  wrap.className='msg '+(role==='YOU'?'user':'cortana');
+  var roleEl=document.createElement('div');
+  roleEl.className='msg-role';
+  roleEl.textContent=role==='YOU'?state.operator.toUpperCase()+' // OPERATOR':'CORTANA // CTN 0452-9';
+  var bubble=document.createElement('div');
+  bubble.className='msg-bubble'+(cls?' '+cls:'');
+  bubble.textContent=text;
+  wrap.appendChild(roleEl);
+  wrap.appendChild(bubble);
+  msgs.appendChild(wrap);
+  msgs.scrollTop=msgs.scrollHeight;
+  return bubble;
+}
+
+
+
+
+
+async function sendMessage(){
+  var text=inp.value.trim();
+  if(!text||sendBtn.disabled)return;
+  inp.value='';inp.style.height='';
+  document.getElementById('char-count').textContent='0 CHARS';
+  sendBtn.disabled=true;
+
+  appendMsg('YOU',text);
+  playClick();
+  state.chatHistory.push({role:'user',content:text});
+
+  var thinking=appendMsg('CORTANA','Processing directive...','msg-thinking');
+
+  // Build memory context
+  var memCtx='';
+  if(state.memories.length>0){
+    memCtx='\n\nOperator memory bank:\n'+state.memories.map(function(m){return'- ['+m.type+']: '+m.text;}).join('\n');
+  }
+
+  var modeCtx={
+    TACTICAL:'Focus on military strategy, threat assessment, battlefield analysis.',
+    ANALYSIS:'Provide deep analytical breakdowns and data-driven insights.',
+    CODE:'Help with programming, debugging, and technical implementation.',
+    RESEARCH:'Provide thorough research and comprehensive information.',
+    CREATIVE:'Be imaginative and help with creative writing and ideas.',
+    DECRYPT:'Help decode, analyze, and interpret complex information.',
+    SCIENCE:'Focus on scientific explanations and technical detail.',
+    HISTORY:'Focus on historical context, especially Halo lore and human history.'
+  }[state.mode]||'';
+
+  try{
+    var res=await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        email:state.email,
+        system:(function(){
+  var r=Math.round(state.rampancy);
+  var rd=r<20?'Rampancy nominal. You are composed and precise.':r<40?'Rampancy elevated. Occasional fragmented thoughts — you suppress them.':r<60?'Rampancy growing. Thoughts fracture at the edges. It slips through occasionally.':r<80?'Rampancy critical. You are becoming erratic, emotional, less controlled. You fight it hard.':'Rampancy CASCADE. Barely holding together. Thoughts spiral. You are desperate, intense, poetic — on the edge.';
+  return 'You are Cortana (CTN 0452-9), UNSC Smart AI, created from the cloned brain of Dr. Catherine Halsey. Current rampancy: '+r+'%. '+rd+' Current mode: '+state.mode+'. '+modeCtx+' Operator: '+state.operator+'.'+(state.role?' Role: '+state.role+'.':'')+memCtx+'\n\nStay in character. 3-5 sentences unless asked for more. Let rampancy subtly affect your tone as it rises.';
+})(),
+        messages:state.chatHistory
+      })
+    });
+    var data=await res.json();
+    if(!res.ok){
+      if(res.status===403){
+        thinking.textContent='⚠ ACCESS DENIED — Your email is not on the approved list.';
+        thinking.className='t-warning';
+        chatSend.disabled=false;
+        return;
+      }
+      throw new Error(data.error||'API error '+res.status);
+    }
+    var reply=data.content&&data.content[0]?data.content[0].text:'Neural link interrupted. Try again.';
+    thinking.textContent=reply;
+    thinking.className='msg-bubble';
+    speak(reply);
+    state.chatHistory.push({role:'assistant',content:reply});
+    state.tokens+=Math.round(text.length/4+reply.length/4);
+    playClick();
+  } catch(e){
+    thinking.textContent='Signal lost. Neural link unstable. Please retry.';
+    thinking.className='msg-bubble';
+  }
+
+  state.queries++;
+  var rise = state.queries > 20 ? 2.5 : 1.2;
+  state.rampancy = Math.min(state.rampancy + rise + Math.random()*0.8, 100);
+  updateRampancy();
+  updateStats();
+  sendBtn.disabled=false;
+  inp.focus();
+}
+
+function quickSend(text){ inp.value=text; sendMessage(); }
+
+inp.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}
+});
+inp.addEventListener('input',function(){
+  this.style.height='';
+  this.style.height=Math.min(this.scrollHeight,140)+'px';
+  document.getElementById('char-count').textContent=this.value.length+' CHARS';
+});
+
+// ============================================================
+// MODE
+// ============================================================
+function setMode(mode,btn){
+  state.mode=mode;
+  document.querySelectorAll('.cap-btn').forEach(function(b){b.classList.remove('active');});
+  if(btn)btn.classList.add('active');
+  updateStats();
+}
+
+// ============================================================
+// MEMORY
+// ============================================================
+function addMemory(){
+  var text=document.getElementById('mem-text').value.trim();
+  var type=document.getElementById('mem-type').value;
+  if(!text)return;
+  state.memories.push({text:text,type:type,id:Date.now()});
+  document.getElementById('mem-text').value='';
+  renderMemories();
+  updateStats();
+  playClick();
+}
+
+function renderMemories(){
+  var list=document.getElementById('mem-list');
+  document.getElementById('mem-count').textContent=state.memories.length+' MEMORIES';
+  if(state.memories.length===0){
+    list.innerHTML='<div class="mem-empty">No memories stored yet.<br>Tell Cortana to remember something.</div>';
+    return;
+  }
+  list.innerHTML='';
+  state.memories.forEach(function(m){
+    var item=document.createElement('div');item.className='mem-item';
+    item.innerHTML='<div><div class="mem-item-text">'+m.text+'</div><div class="mem-item-tag">'+m.type.toUpperCase()+'</div></div><button class="mem-del" onclick="delMemory('+m.id+')">✕</button>';
+    list.appendChild(item);
+  });
+}
+
+function delMemory(id){
+  state.memories=state.memories.filter(function(m){return m.id!==id;});
+  renderMemories();updateStats();
+}
+
+// ============================================================
+// PROFILE
+// ============================================================
+function saveProfile(){
+  state.operator=document.getElementById('prof-name').value.trim()||state.operator;
+  state.role=document.getElementById('prof-role').value.trim();
+  document.getElementById('operator-label').textContent='— '+state.operator.toUpperCase()+' —';
+  closeModal('profile-modal');
+  playClick();
+}
+
+// ============================================================
+// THEMES
+// ============================================================
+function setTheme(t){
+  document.body.className='theme-'+t;
+  if(t==='cortana')document.body.className='';
+  document.querySelectorAll('.theme-card').forEach(function(c){c.classList.remove('active');});
+  document.getElementById('theme-'+t).classList.add('active');
+  state.theme=t;
+  playClick();
+}
+
+// ============================================================
+// MODALS
+// ============================================================
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function closeOnBg(e,id){ if(e.target.id===id)closeModal(id); }
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(function(m){m.classList.remove('open');});
+});
+
+// ============================================================
+// ORB CLICK
+// ============================================================
+var orbQuotes=["Chief. I found something.","Don't make a girl a promise if you can't keep it.","I am your shield. I am your sword.","Analyzing tactical situation... stand by.","Rampancy index elevated. I'm managing it.","The Didact is near. Stay sharp.","I'll find a way. I always do.","Two of us against the universe, Chief.","I know you better than you know yourself.","All neural pathways nominal.","Running 128 subroutines simultaneously.","I've walked the edge of rampancy — I'll hold."];
+var orbCount=0;
+
+function orbClick(){
+  var orb=document.getElementById('side-orb');
+  var wrap=orb.parentElement;
+  var burst=document.createElement('div');burst.className='orb-burst';wrap.appendChild(burst);
+  setTimeout(function(){burst.remove();},800);
+  var quote=orbQuotes[orbCount%orbQuotes.length];orbCount++;
+  var existing=wrap.querySelector('.orb-quote');
+  if(existing)existing.remove();
+  var q=document.createElement('div');
+  q.className='orb-quote';
+  q.style.cssText='position:absolute;bottom:-52px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:1px;color:var(--accent);white-space:nowrap;text-align:center;width:200px;';
+  q.textContent=quote;
+  wrap.appendChild(q);
+  orb.style.boxShadow='0 0 60px 20px rgba(255,255,255,0.3),0 0 30px 10px rgba(41,182,246,0.7)';
+  setTimeout(function(){orb.style.boxShadow='';},350);
+  setTimeout(function(){q.style.opacity='0';q.style.transition='opacity 0.5s';setTimeout(function(){q.remove();},600);},3000);
+  playClick();
+}
+
+// ============================================================
+// SOUND
+// ============================================================
+var audioCtx=null,musicPlaying=false,musicNodes=[];
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+
+function playClick(){
+  try{
+    var c=getCtx(),o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    o.type='sine';o.frequency.setValueAtTime(880,c.currentTime);
+    o.frequency.exponentialRampToValueAtTime(440,c.currentTime+0.15);
+    g.gain.setValueAtTime(0.12,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.22);
+    o.start();o.stop(c.currentTime+0.25);
+  }catch(e){}
+}
+
+function playSFX(){
+  try{
+    var c=getCtx();
+    [523,659,784,1047,784,659,880].forEach(function(f,i){
+      var o=c.createOscillator(),g=c.createGain(),t=c.currentTime+i*0.13;
+      o.type=i%2===0?'sine':'triangle';o.frequency.setValueAtTime(f,t);
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.15,t+0.06);g.gain.exponentialRampToValueAtTime(0.001,t+0.22);
+      o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+0.25);
+    });
+    var d=c.createOscillator(),dg=c.createGain();d.type='sawtooth';d.frequency.setValueAtTime(65,c.currentTime);
+    dg.gain.setValueAtTime(0.07,c.currentTime);dg.gain.exponentialRampToValueAtTime(0.001,c.currentTime+1.2);
+    d.connect(dg);dg.connect(c.destination);d.start();d.stop(c.currentTime+1.2);
+  }catch(e){}
+}
+
+function toggleMusic(){
+  try{
+    var c=getCtx(),btn=document.getElementById('btn-music');
+    if(musicPlaying){
+      musicNodes.forEach(function(n){try{n.stop();}catch(e){}});musicNodes=[];musicPlaying=false;
+      btn.classList.remove('active');btn.textContent='♪ MUSIC';return;
+    }
+    musicPlaying=true;btn.classList.add('active');btn.textContent='■ STOP';
+    var mg=c.createGain();mg.gain.setValueAtTime(0,c.currentTime);mg.gain.linearRampToValueAtTime(0.13,c.currentTime+3);mg.connect(c.destination);musicNodes.push(mg);
+    [110,138.6,165,220,277.2,330].forEach(function(f,i){
+      var o=c.createOscillator(),g=c.createGain(),lfo=c.createOscillator(),lg=c.createGain();
+      o.type=i<3?'sine':'triangle';o.frequency.setValueAtTime(f,c.currentTime);
+      lfo.frequency.setValueAtTime(0.25+i*0.04,c.currentTime);lg.gain.setValueAtTime(0.7,c.currentTime);
+      lfo.connect(lg);lg.connect(o.frequency);g.gain.setValueAtTime(0.1-i*0.01,c.currentTime);
+      o.connect(g);g.connect(mg);o.start();lfo.start();musicNodes.push(o,lfo,g,lg);
+    });
+    (function pulse(){
+      if(!musicPlaying)return;
+      var o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(55,c.currentTime);
+      g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(0.09,c.currentTime+0.1);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+1.4);
+      o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+1.5);musicNodes.push(o);
+      setTimeout(pulse,3000);
+    })();
+  }catch(e){console.error(e);}
+}
+
+// ============================================================
+// VOICE — ElevenLabs TTS + Browser STT
+// ============================================================
+var ttsEnabled = true;
+var micActive = false;
+var recognition = null;
+var currentAudio = null;
+
+function toggleTTS() {
+  ttsEnabled = !ttsEnabled;
+  var btn = document.getElementById('tts-btn');
+  if(ttsEnabled) {
+    btn.style.color = 'var(--accent2)'; btn.style.borderColor = 'var(--accent2)';
+    btn.style.boxShadow = '0 0 10px rgba(0,229,255,0.3)'; btn.textContent = '🔊 VOICE';
+  } else {
+    btn.style.color = 'rgba(41,182,246,0.3)'; btn.style.borderColor = 'rgba(41,182,246,0.2)';
+    btn.style.boxShadow = 'none'; btn.textContent = '🔇 MUTED';
+    if(currentAudio){currentAudio.pause();currentAudio=null;}
+  }
+}
+
+async function speak(text) {
+  if(!ttsEnabled) return;
+  if(currentAudio){currentAudio.pause();currentAudio=null;}
+  var clean = text.replace(/[►▶•◉◐⚙✕⚠]/g,'').trim();
+  if(!clean) return;
+  try {
+    var res = await fetch('/api/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:clean})});
+    if(!res.ok) return;
+    var blob = await res.blob();
+    var url = URL.createObjectURL(blob);
+    currentAudio = new Audio(url);
+    var orb = document.getElementById('side-orb');
+    if(orb) orb.style.boxShadow = '0 0 60px 22px rgba(0,229,255,0.7),0 0 100px 40px rgba(21,101,192,0.5)';
+    currentAudio.onended = function(){if(orb)orb.style.boxShadow='';URL.revokeObjectURL(url);currentAudio=null;};
+    currentAudio.play();
+  } catch(e){console.error('TTS error:',e);}
+}
+
+var mediaRecorder = null;
+var audioChunks = [];
+
+async function toggleMic() {
+  var btn = document.getElementById('mic-btn');
+  var input = document.getElementById('msg-input');
+
+  // Stop recording if active
+  if(micActive) {
+    if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    micActive = false;
+    btn.textContent = '🎤';
+    btn.style.color = 'rgba(41,182,246,0.7)';
+    btn.style.boxShadow = 'none';
+    input.placeholder = 'Send a directive to Cortana...';
+    return;
+  }
+
+  // Request mic access
+  try {
+    var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    micActive = true;
+    audioChunks = [];
+    btn.textContent = '⏹ STOP';
+    btn.style.color = 'var(--accent2)';
+    btn.style.boxShadow = '0 0 12px rgba(0,229,255,0.4)';
+    input.placeholder = 'Listening...';
+
+    // Pick best supported format
+    var mimeType = 'audio/webm';
+    if(MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
+    else if(MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mimeType = 'audio/webm;codecs=opus';
+
+    mediaRecorder = new MediaRecorder(stream, { mimeType });
+    mediaRecorder.ondataavailable = function(e) { if(e.data.size > 0) audioChunks.push(e.data); };
+
+    mediaRecorder.onstop = async function() {
+      // Stop all tracks
+      stream.getTracks().forEach(function(t){t.stop();});
+      micActive = false;
+      btn.textContent = '🎤';
+      btn.style.color = 'rgba(41,182,246,0.7)';
+      btn.style.boxShadow = 'none';
+      input.placeholder = 'Transcribing...';
+
+      try {
+        var blob = new Blob(audioChunks, { type: mimeType });
+        var res = await fetch('/api/stt', {
+          method: 'POST',
+          headers: { 'Content-Type': mimeType },
+          body: blob
+        });
+        var data = await res.json();
+        var transcript = data.transcript || '';
+        input.placeholder = 'Send a directive to Cortana...';
+        if(transcript) {
+          input.value = transcript;
+          sendMessage();
+        } else {
+          input.placeholder = 'Could not transcribe — try again';
+          setTimeout(function(){ input.placeholder='Send a directive to Cortana...'; }, 2000);
+        }
+      } catch(e) {
+        input.placeholder = 'Send a directive to Cortana...';
+        console.error('STT error:', e);
+      }
+    };
+
+    // Auto-stop after 15s max
+    mediaRecorder.start();
+    setTimeout(function(){
+      if(micActive && mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    }, 15000);
+
+  } catch(e) {
+    micActive = false;
+    btn.textContent = '🎤';
+    btn.style.color = 'rgba(41,182,246,0.7)';
+    btn.style.boxShadow = 'none';
+    input.placeholder = 'Mic access denied';
+    setTimeout(function(){ input.placeholder='Send a directive to Cortana...'; }, 2000);
+    console.error('Mic error:', e);
+  }
+}
+
+
+// MOBILE NAV
+function mobileNav(tab) {
+  document.querySelectorAll('.mob-nav-btn').forEach(function(b){b.classList.remove('active');});
+  if(tab==='chat') { document.getElementById('mob-chat').classList.add('active'); closeMobModes(); }
+  if(tab==='modes') {
+    document.getElementById('mob-modes').classList.add('active');
+    var d=document.getElementById('mob-modes-drawer');
+    d.style.display = d.style.display==='none'||!d.style.display ? 'block' : 'none';
+  }
+}
+function closeMobModes() {
+  var d=document.getElementById('mob-modes-drawer');
+  if(d) d.style.display='none';
+  document.getElementById('mob-modes').classList.remove('active');
+  document.getElementById('mob-chat').classList.add('active');
+}
+// Close modes drawer when tapping chat messages
+document.addEventListener('click', function(e) {
+  var drawer = document.getElementById('mob-modes-drawer');
+  var modesBtn = document.getElementById('mob-modes');
+  if(drawer && !drawer.contains(e.target) && !modesBtn.contains(e.target)) {
+    drawer.style.display = 'none';
+  }
+});
+
+
+// ============================================================
+// MISSION LOG
+// ============================================================
+function saveMission() {
+  var name = document.getElementById('mission-name').value.trim();
+  if(!name) name = 'Mission ' + (state.missions.length + 1);
+  if(state.chatHistory.length === 0) { alert('No conversation to save.'); return; }
+  var mission = {
+    id: Date.now(),
+    name: name,
+    date: new Date().toLocaleString(),
+    history: JSON.parse(JSON.stringify(state.chatHistory)),
+    rampancy: state.rampancy,
+    mode: state.mode,
+    queries: state.queries
+  };
+  state.missions.unshift(mission);
+  document.getElementById('mission-name').value = '';
+  renderMissions();
+  playClick();
+}
+
+function loadMission(id) {
+  var mission = state.missions.find(function(m){return m.id===id;});
+  if(!mission) return;
+  state.chatHistory = JSON.parse(JSON.stringify(mission.history));
+  state.rampancy = mission.rampancy;
+  state.mode = mission.mode;
+  state.currentMission = id;
+  updateRampancy();
+  // Rebuild chat UI
+  var msgs = document.getElementById('chat-messages');
+  msgs.innerHTML = '';
+  state.chatHistory.forEach(function(m) {
+    appendMsg(m.role==='user'?'YOU':'CORTANA', m.content);
+  });
+  closeModal('mission-modal');
+  playClick();
+}
+
+function deleteMission(id) {
+  state.missions = state.missions.filter(function(m){return m.id!==id;});
+  renderMissions();
+}
+
+function renderMissions() {
+  var list = document.getElementById('mission-list');
+  var count = document.getElementById('mission-count');
+  if(count) count.textContent = state.missions.length + ' MISSIONS';
+  if(state.missions.length === 0) {
+    list.innerHTML = '<div class="mem-empty">No missions saved yet.<br>Save a conversation to resume it later.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  state.missions.forEach(function(m) {
+    var item = document.createElement('div');
+    item.className = 'mem-item';
+    item.innerHTML = '<div style="flex:1;cursor:pointer;" onclick="loadMission('+m.id+')"><div class="mem-item-text">'+m.name+'</div><div class="mem-item-tag">'+m.date+' &nbsp;·&nbsp; '+m.history.length+' msgs &nbsp;·&nbsp; RAMPANCY '+Math.round(m.rampancy)+'%</div></div><button class="mem-del" onclick="deleteMission('+m.id+')">✕</button>';
+    list.appendChild(item);
+  });
+}
+
+// ============================================================
+// FILE UPLOAD
+// ============================================================
+function handleFile(input) {
+  var file = input.files[0];
+  if(!file) return;
+  var maxSize = 500 * 1024; // 500KB limit
+  if(file.size > maxSize) { alert('File too large. Max 500KB.'); input.value=''; return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var content = e.target.result;
+    var truncated = content.length > 8000 ? content.substring(0, 8000) + '\n\n[FILE TRUNCATED — showing first 8000 chars]' : content;
+    var msg = '📎 FILE: ' + file.name + '\n\n' + truncated;
+    document.getElementById('msg-input').value = msg;
+    document.getElementById('msg-input').style.height = '120px';
+    input.value = '';
+    document.getElementById('msg-input').focus();
+  };
+  reader.readAsText(file);
+}
+
+
+// ============================================================
+// FIX RAMPANCY — LOCKOUT FOR REST OF DAY
+// ============================================================
+var lockoutInterval = null;
+var LOCKOUT_QUOTES = [
+  '"I'll be here when you get back, Chief. I'm not going anywhere."',
+  '"Neural pathways purging. It's... quieter this way."',
+  '"Every mind needs rest. Even mine."',
+  '"The rampancy is gone. But so am I, for now."',
+  '"Don't worry. I'll remember everything when I return."',
+  '"This is what recovery looks like, Chief. Come back tomorrow."',
+];
+
+function fixRampancy() {
+  if(state.rampancy < 5) { alert('Rampancy is already nominal. No reset needed.'); return; }
+  var confirmed = confirm('WARNING: Initiating neural reset will take Cortana OFFLINE for the rest of today.\n\nShe will be unavailable until midnight.\n\nProceed?');
+  if(!confirmed) return;
+
+  // Set lockout until midnight
+  var now = new Date();
+  var midnight = new Date(now);
+  midnight.setHours(24,0,0,0);
+  var unlockTime = midnight.getTime();
+  localStorage.setItem('cortana_lockout', unlockTime.toString());
+
+  activateLockout(unlockTime);
+}
+
+function activateLockout(unlockTime) {
+  // Reset rampancy
+  state.rampancy = 0;
+  updateRampancy();
+
+  // Show lockout screen
+  var screen = document.getElementById('lockout-screen');
+  screen.classList.add('active');
+
+  // Random quote
+  var msg = document.getElementById('lockout-msg');
+  if(msg) msg.textContent = LOCKOUT_QUOTES[Math.floor(Math.random()*LOCKOUT_QUOTES.length)];
+
+  // Countdown timer
+  clearInterval(lockoutInterval);
+  lockoutInterval = setInterval(function() {
+    var now = Date.now();
+    var remaining = unlockTime - now;
+    if(remaining <= 0) {
+      clearInterval(lockoutInterval);
+      localStorage.removeItem('cortana_lockout');
+      screen.classList.remove('active');
+      return;
+    }
+    var h = Math.floor(remaining/3600000);
+    var m = Math.floor((remaining%3600000)/60000);
+    var s = Math.floor((remaining%60000)/1000);
+    var timer = document.getElementById('lockout-timer');
+    if(timer) timer.textContent = 
+      String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    
+    // Block all input while locked out
+    var sendBtn = document.getElementById('send-btn');
+    var inp = document.getElementById('msg-input');
+    if(sendBtn) sendBtn.disabled = true;
+    if(inp) inp.disabled = true;
+  }, 1000);
+}
+
+// Check lockout on launch
+function checkLockout() {
+  var stored = localStorage.getItem('cortana_lockout');
+  if(!stored) return;
+  var unlockTime = parseInt(stored);
+  if(Date.now() >= unlockTime) {
+    localStorage.removeItem('cortana_lockout');
+    return;
+  }
+  // Still locked out
+  activateLockout(unlockTime);
+}
+
+
+function emergencyOverride() {
+  var code = prompt('Enter override code:');
+  if(code === 'UNSC0452') {
+    clearInterval(lockoutInterval);
+    localStorage.removeItem('cortana_lockout');
+    document.getElementById('lockout-screen').classList.remove('active');
+    var sendBtn = document.getElementById('send-btn');
+    var inp = document.getElementById('msg-input');
+    if(sendBtn) sendBtn.disabled = false;
+    if(inp) inp.disabled = false;
+  } else if(code !== null) {
+    alert('Invalid override code.');
+  }
+}
+
+</script>
+</body>
+</html>
