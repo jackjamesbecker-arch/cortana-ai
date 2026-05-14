@@ -1,9 +1,0 @@
-{
-  "routes": [
-    { "src": "/api/auth", "dest": "/api/auth.mjs" },
-    { "src": "/api/chat", "dest": "/api/chat.mjs" },
-    { "src": "/api/tts", "dest": "/api/tts.mjs" },
-    { "src": "/api/stt", "dest": "/api/stt.mjs" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ]
-}
