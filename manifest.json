@@ -1,0 +1,27 @@
+{
+  "name": "CORTANA — UNSC AI",
+  "short_name": "Cortana",
+  "description": "UNSC Smart AI CTN 0452-9 — Adaptive AI Assistant",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020d1a",
+  "theme_color": "#29b6f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3CradialGradient id='og' cx='40%25' cy='35%25' r='60%25'%3E%3Cstop offset='0%25' stop-color='%234fc3f7'/%3E%3Cstop offset='45%25' stop-color='%231565c0'/%3E%3Cstop offset='100%25' stop-color='%230a1e5e'/%3E%3C/radialGradient%3E%3CradialGradient id='bg' cx='50%25' cy='50%25' r='55%25'%3E%3Cstop offset='0%25' stop-color='%231565c0' stop-opacity='0.3'/%3E%3Cstop offset='100%25' stop-color='%231565c0' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='512' height='512' fill='%23020d1a'/%3E%3Ccircle cx='256' cy='256' r='240' fill='url(%23bg)'/%3E%3Ccircle cx='256' cy='256' r='240' fill='none' stroke='%2329b6f6' stroke-width='8' opacity='0.4'/%3E%3Ccircle cx='256' cy='256' r='190' fill='none' stroke='%2329b6f6' stroke-width='5' opacity='0.25'/%3E%3Ccircle cx='256' cy='256' r='140' fill='none' stroke='%2329b6f6' stroke-width='4' opacity='0.2'/%3E%3Ccircle cx='256' cy='256' r='128' fill='url(%23og)'/%3E%3Ccircle cx='256' cy='256' r='128' fill='none' stroke='%2300e5ff' stroke-width='6'/%3E%3Ccircle cx='210' cy='210' r='38' fill='white' opacity='0.18'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "New Mission",
+      "short_name": "Mission",
+      "description": "Start a new Cortana session",
+      "url": "/?mode=tactical"
+    }
+  ]
+}
